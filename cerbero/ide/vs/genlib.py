@@ -70,6 +70,7 @@ class GenLib(object):
             variable = 'VS{0}COMNTOOLS'.format(version)
             if variable in os.environ:
                 path = os.path.join(os.environ[variable], '..', '..', 'VC', 'bin', 'amd64')
-                if os.path.exists (path):
+                libtool=os.path.join(path,'lib.exe')
+                if os.path.isfile (libtool):
                     return path
         return None
