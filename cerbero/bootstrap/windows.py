@@ -71,6 +71,7 @@ class WindowsBootstrapper(BootstrapperBase):
             self.install_bin_deps()
         self.install_gl_headers()
         self.install_python_sdk()
+        self._install_nasm()
 
     def check_dirs(self):
         if not os.path.exists(self.prefix):
@@ -83,9 +84,12 @@ class WindowsBootstrapper(BootstrapperBase):
         tarball = MINGW_TARBALL_TPL % (self.version, GCC_VERSION,
                 self.platform, self.arch)
 
-        tarfile = os.path.join(self.prefix, tarball)
-        tarfile = os.path.abspath(tarfile)
-        shell.download("%s/%s" % (MINGW_DOWNLOAD_SOURCE, tarball), tarfile, check_cert=False)
+        url="%s/%s" % (MINGW_DOWNLOAD_SOURCE, tarball)
+        tarfile=os.path.join( self.config.cached_sources, url.replace('http://',''))
+        if not os.path.isfile(tarfile):
+            tarfile = os.path.join(self.prefix, tarball)
+            tarfile = os.path.abspath(tarfile)
+            shell.download("%s/%s" % (MINGW_DOWNLOAD_SOURCE, tarball), tarfile, check_cert=False)
         try:
             shell.unpack(tarfile, self.prefix)
         except Exception:
@@ -216,6 +220,26 @@ class WindowsBootstrapper(BootstrapperBase):
         if os.path.exists(strings):
             os.remove(strings)
         shutil.copy(p_strings, strings)
+
+    def _install_nasm(self):
+        version='2.13.01'
+        url='http://www.nasm.us/pub/nasm/releasebuilds/{0}/win32/nasm-{0}-win32.zip'.format(version)
+
+        tmp_dir = tempfile.mkdtemp()
+
+        tarball=os.path.join( self.config.cached_sources, url.replace('http://',''))
+        if not os.path.isfile(tarball):
+            shell.download( url, tmp_dir )
+            tarball = os.path.join( tmp_dir, 'nasm-{0}-win32.zip'.format(version))
+        shell.unpack( tarball, tmp_dir )
+        path = os.path.join( tmp_dir, 'nasm-{0}/nasm.exe'.format(version))
+        dstd=os.path.join(self.config.build_tools_prefix,'bin')
+        if not os.path.isdir( dstd ):
+            os.makedirs( dstd )
+
+        shutil.copy( path , os.path.join( dstd, 'nasm.exe' ) )
+        shutil.rmtree( tmp_dir )
+        
 
 
 def register_all():
