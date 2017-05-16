@@ -17,3 +17,4 @@ MANIFEST.in
 *.wixobj
 *.tar.xz
 /~tmp
+/sources
