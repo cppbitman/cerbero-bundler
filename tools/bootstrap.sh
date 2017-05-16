@@ -111,7 +111,7 @@ function _prepare(){
 	mv ~tmp/cerbero-${VERSION}/sources .
 	
 	_fetch $(eval map 'cerbero-tarball-sources-1')
-	_tar -xJf  cerbero-${VERSION}-sources-${PATCHNO}.tar.xz -C sources/. --checkpoint=100
+	_tar -xJf  cerbero-${VERSION}-sources-${PATCHNO}.tar.xz -C . --checkpoint=100
 }
 
 function _windows(){
