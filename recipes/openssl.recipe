@@ -54,12 +54,30 @@ class Recipe(recipe.Recipe):
             self.make = 'nmake.exe -f Makefile'
             self.make_install = 'nmake.exe -f Makefile install'
 
-     
+
+    def compile(self):
+        suffix={Architecture.X86:'',Architecture.X86_64:'-1_1-x64'}[self.config.target_arch]
+        #modify makfile lib related name to fit cerber rules
+        print os.getcwd(),'************'
+        print os.path.join(self.make_dir,'makefile')
+        f = open(os.path.join(self.make_dir,'makefile'),'r')
+        content = f.read()
+        f.close()
+        assert len(content) > 100
+        for name in ('libssl','libcrypto'):
+            content = content.replace( name + suffix ,name,-1 )
+
+        f = open(os.path.join(self.make_dir,'makefile'),'w')
+        f.write(content)
+        f.close()
+        import time
+        time.sleep(1)
+
+        super(Recipe,self).compile()
 
 
 
     def post_install(self):
-        return
         self._process_libs()
         self._install_pc()
 
@@ -73,10 +91,10 @@ class Recipe(recipe.Recipe):
                 shell.check_call('dlltool --dllname %(prefix)s/bin/%(name)s.dll --def %(prefix)s/lib/%(libname)s.def --output-lib %(prefix)s/lib/%(libname)s.dll.a '%{
                     'name':name, 'prefix':self.config.prefix ,'libname':libname} )
 
-            libd =os.path.join( self.config.prefix, 'lib')
+            #libd =os.path.join( self.config.prefix, 'lib')
 
-            shutil.copy2( os.path.join( libd,'libssl.lib'),os.path.join( libd,'ssl.lib'))
-            shutil.copy2( os.path.join( libd,'libcrypto.lib'),os.path.join( libd,'crypto.lib'))
+            #shutil.copy2( os.path.join( libd,'libssl.lib'),os.path.join( libd,'ssl.lib'))
+            #shutil.copy2( os.path.join( libd,'libcrypto.lib'),os.path.join( libd,'crypto.lib'))
 
 
     def _install_pdb(self):
