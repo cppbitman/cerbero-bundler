@@ -99,12 +99,16 @@ class WindowsBootstrapper(BootstrapperBase):
 
     def install_python_sdk(self):
         ### FIXME : MOVE OVER REPOSITORY TO STANDARD ROOT
+        cached_root = os.path.join(self.config.cached_sources,'windows-external-sdk')
         old_sdk_git_root = 'git://anongit.freedesktop.org/gstreamer-sdk'
         m.action(_("Installing Python headers"))
-        tmp_dir = tempfile.mkdtemp()
-        shell.call("git clone %s" % os.path.join(old_sdk_git_root,
-                                                 'windows-external-sdk.git'),
-                   tmp_dir)
+        if os.path.isdir( cached_root ):
+            tmp_dir=self.config.cached_sources
+        else:
+            tmp_dir = tempfile.mkdtemp()
+            shell.call("git clone %s" % os.path.join(old_sdk_git_root,
+                                                    'windows-external-sdk.git'),
+                    tmp_dir)
 
         python_headers = os.path.join(self.prefix, 'include', 'Python2.7')
         python_headers = to_unixpath(os.path.abspath(python_headers))
@@ -123,7 +127,8 @@ class WindowsBootstrapper(BootstrapperBase):
         except:
             pass
         shell.call('ln -s python27.dll python.dll', '%s/lib' % self.prefix)
-        shutil.rmtree(tmp_dir)
+        if self.config.cached_sources != tmp_dir:
+            shutil.rmtree(tmp_dir)
 
     def install_mingwget_deps(self):
         for dep in MINGWGET_DEPS:
@@ -136,14 +141,22 @@ class WindowsBootstrapper(BootstrapperBase):
         else:
             inst_path = os.path.join(self.prefix, 'x86_64-w64-mingw32/include/GL/wglext.h')
         gl_header = 'http://www.opengl.org/registry/api/GL/wglext.h'
-        shell.download(gl_header, inst_path, False, check_cert=False)
+        gl_header_cached = os.path.join( self.config.cached_sources, gl_header.replace('http://',''))
+        if os.path.isfile( gl_header_cached):
+            shutil.copy( gl_header_cached, inst_path )
+        else:
+            shell.download(gl_header, inst_path, False, check_cert=False)
 
     def install_bin_deps(self):
         # FIXME: build intltool as part of the build tools bootstrap
         for url in WINDOWS_BIN_DEPS:
             temp = fix_winpath(tempfile.mkdtemp())
             path = os.path.join(temp, 'download.zip')
-            shell.download(GNOME_FTP + url, path)
+            cached_path = os.path.join(self.config.cached_sources, GNOME_FTP.replace('http://',''),url)
+            if os.path.isfile( cached_path ):
+                path = cached_path
+            else:
+                shell.download(GNOME_FTP + url, path)
             shell.unpack(path, self.config.toolchain_prefix)
         # replace /opt/perl/bin/perl in intltool
         files = shell.ls_files(['bin/intltool*'], self.config.toolchain_prefix)
