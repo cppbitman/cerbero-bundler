@@ -108,10 +108,13 @@ class MakefilesBase (Build):
     srcdir = '.'
     append_env = None
     new_env = None
+    prepend_env = None
     requires_non_src_build = False
 
     def __init__(self):
         Build.__init__(self)
+        if self.prepend_env is None:
+            self.prepend_env = {}
         if self.append_env is None:
             self.append_env = {}
         if self.new_env is None:
@@ -172,8 +175,13 @@ class MakefilesBase (Build):
             return None
 
         self._old_env = {}
-        for var in append_env.keys() + new_env.keys():
+        for var in self.prepend_env.keys() + append_env.keys() + new_env.keys():
             self._old_env[var] = os.environ.get(var, None)
+        for var, val in self.prepend_env.iteritems():
+            if not os.environ.has_key(var):
+                os.environ[var] = val
+            else:
+                os.environ[var] = '%s%s' % (val,os.environ[var])
 
         for var, val in append_env.iteritems():
             if not os.environ.has_key(var):
