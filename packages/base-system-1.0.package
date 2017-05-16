@@ -8,6 +8,7 @@ class Package(custom.GStreamer, package.Package):
     shortdesc = 'Base system dependencies'
     longdesc = 'Base system dependencies'
     uuid = 'fae6046d-5a39-4d54-93ee-3770d2f316f5'
+    deps = ['base-libs']
 
     files = ['cairo:libs', 'expat:libs', 'fontconfig:libs:etc',
              'gdk-pixbuf:bins:libs:modules:lang', 'libffi:libs', 'freetype:libs',
