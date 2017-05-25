@@ -109,7 +109,7 @@ class PCFile(object):
                 continue
 
 
-PKG_PATTERN = re.compile('(?P<name>\w+(-\w+)*)'
+PKG_PATTERN = re.compile('(?P<name>\w+(-[\w\.]+)*)'
   + '-(?P<platform>(windows|linux))'
   + '-(?P<arch>(x86|x86_64))'
   + '-(?P<version>(\d+(.\d+)*(-\d+)*))'
@@ -124,7 +124,7 @@ class Installer(object):
         self._prefix = prefix
 
     def _pkginfo(self, tarball):
-        pkginfo = re.match(PKG_PATTERN, tarball)
+        pkginfo = re.match(PKG_PATTERN, tarball )
         if not pkginfo:
             raise InstallError('invalied package name :%s' % tarball)
 
@@ -133,16 +133,17 @@ class Installer(object):
             pkginfo_dict['type'] = ''
         return pkginfo_dict
 
-    def install(self, tarball):
+    def install(self, path):
         '''
-        tarball - path of the package(tar.bz2)
+        path - path of the package(tar.bz2)
         '''
+        tarball = os.path.basename( path )
         pkginfo = self._pkginfo(tarball)
         if not pkginfo:
             raise InstallError('invalied package name :%s' % tarball)
 
         #try:
-        tar = tarfile.open(tarball, "r:bz2")
+        tar = tarfile.open(path, "r:bz2")
         self._reginfo(tar ,pkginfo)
 
         self._detar(tar ,pkginfo)

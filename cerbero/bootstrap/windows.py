@@ -60,6 +60,10 @@ class WindowsBootstrapper(BootstrapperBase):
         self.platform = self.config.platform
 
         self.check_dirs()
+        print '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+
+
+        return 
         if self.platform == Platform.WINDOWS:
             # For wget
             self.install_mingwget_deps()

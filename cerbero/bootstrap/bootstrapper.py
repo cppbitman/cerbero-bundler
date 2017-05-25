@@ -22,6 +22,7 @@ from cerbero.errors import FatalError
 from cerbero.utils import _
 from cerbero.utils import messages as m
 from cerbero.bootstrap.build_tools import BuildTools
+from cerbero.bootstrap.project     import Project
 
 
 bootstrappers = {}
@@ -67,6 +68,7 @@ class Bootstrapper (object):
                 v = None
 
             bs.insert(0, bootstrappers[d][v](config))
+        bs.append(Project(config))
 
         return bs
 
