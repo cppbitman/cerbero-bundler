@@ -58,6 +58,9 @@ class Package(Command):
                     'create this package (conflicts with --skip-deps-build)')),
             ArgparseArgument('-k', '--keep-temp', action='store_true',
                 default=False, help=_('Keep temporary files for debug')),
+
+            ArgparseArgument('-g', '--gen-tarball-desc', action='store_true',
+                default=False, help=_('Generate package description file')),
             ])
 
     def run(self, config, args):
