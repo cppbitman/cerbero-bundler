@@ -36,10 +36,12 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             self._remove_steps ([BuildSteps.GEN_LIBFILES])
 
-            
+            print software.ActivePerl().path()
             perl = software.ActivePerl().path()
-            if not perl:
-                CerberoException('ActivePerl not installed')
+            print perl
+            #if not perl:
+			    #print 'ActivePerl not installed'
+                #CerberoException('ActivePerl not installed')
 
             self.new_env= software.VisualStudio(self.config.target_arch).environ()
             self.prepend_env['PATH']=self.new_env['VisualStudioPath']+';'
@@ -56,24 +58,26 @@ class Recipe(recipe.Recipe):
 
 
     def compile(self):
-        suffix={Architecture.X86:'',Architecture.X86_64:'-1_1-x64'}[self.config.target_arch]
-        #modify makfile lib related name to fit cerber rules
-        print os.getcwd(),'************'
-        print os.path.join(self.make_dir,'makefile')
-        f = open(os.path.join(self.make_dir,'makefile'),'r')
-        content = f.read()
-        f.close()
-        assert len(content) > 100
-        for name in ('libssl','libcrypto'):
-            content = content.replace( name + suffix ,name,-1 )
+        if self.config.target_platform == Platform.WINDOWS:
+            suffix={Architecture.X86:'-1_1',Architecture.X86_64:'-1_1-x64'}[self.config.target_arch]
+            #modify makfile lib related name to fit cerber rules
+            print os.getcwd(),'************'
+            print os.path.join(self.make_dir,'makefile')
+            f = open(os.path.join(self.make_dir,'makefile'),'r')
+            content = f.read()
+            f.close()
+            assert len(content) > 100
+            for name in ('libssl','libcrypto'):
+                content = content.replace( name + suffix ,name,-1 )
+                content = content.replace( name+'.lib', name[3:]+'.lib',-1 )
 
-        f = open(os.path.join(self.make_dir,'makefile'),'w')
-        f.write(content)
-        f.close()
-        import time
-        time.sleep(1)
+            f = open(os.path.join(self.make_dir,'makefile'),'w')
+            f.write(content)
+            f.close()
+            import time
+            time.sleep(1)
 
-        super(Recipe,self).compile()
+            super(Recipe,self).compile()
 
 
 
