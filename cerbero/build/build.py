@@ -352,9 +352,95 @@ class CMake (MakefilesBase):
         MakefilesBase.configure(self)
 
 
+class AutoCMake (MakefilesBase):
+    '''
+    Build handler for cmake projects
+    '''
+
+    config_sh = 'cmake'
+    configure_tpl = '%(config-sh)s -DCMAKE_INSTALL_PREFIX=%(prefix)s '\
+                    '-DCMAKE_LIBRARY_OUTPUT_PATH=%(libdir)s %(options)s '\
+                    '-DCMAKE_MODULE_PATH=D:/github.com/AutoCMake '\
+                    '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '
+
+    make = 'msbuild.exe ALL_BUILD.vcxproj'
+    make_install = 'msbuild.exe INSTALL.vcxproj'
+    make_check = 'msbuild.exe RUN_TESTS.vcxproj'
+    make_clean = 'msbuild.exe /t:clean ALL_BUILD.vcxproj'
+    requires_non_src_build = True
+
+
+    @modify_environment
+    def configure(self):
+        # FIXME: CMake doesn't support passing "ccache $CC"
+        if self.config.use_ccache:
+            cc = cc.replace('ccache', '').strip()
+            cxx = cxx.replace('ccache', '').strip()
+
+        if self.config.target_platform == Platform.WINDOWS:
+            self.configure_options += ' -DCMAKE_SYSTEM_NAME=Windows '
+        elif self.config.target_platform == Platform.ANDROID:
+            self.configure_options += ' -DCMAKE_SYSTEM_NAME=Linux '
+
+        print self.config.target_arch,"<-------"
+
+        if self.config.target_arch == Architecture.X86:
+            self.configure_options += ' -G\\"Visual Studio 14\\" '
+        elif self.config.target_arch == Architecture.X86_64:
+            self.configure_options += ' -G\\"Visual Studio 14 2015 Win64\\" '
+        
+        if self.config.variants.debug:
+            self.configure_options += '-DCMAKE_BUILD_TYPE=Debug '
+        else:
+            self.configure_options += '-DCMAKE_BUILD_TYPE=Release '
+
+        print '%s | %s'%(self.config_src_dir,self.make_dir)
+
+        if self.config_src_dir != self.make_dir:
+            self.configure_options += ' %s '%self.config_src_dir
+            
+
+
+
+        # FIXME: Maybe export the sysroot properly instead of doing regexp magic
+        if self.config.target_platform in [Platform.DARWIN, Platform.IOS]:
+            r = re.compile(r".*-isysroot ([^ ]+) .*")
+            sysroot = r.match(cflags).group(1)
+            self.configure_options += ' -DCMAKE_OSX_SYSROOT=%s' % sysroot
+
+        #self.configure_options += ' -DCMAKE_C_COMPILER=%s ' % cc
+        #self.configure_options += ' -DCMAKE_CXX_COMPILER=%s ' % cxx
+        #self.configure_options += ' -DCMAKE_C_FLAGS="%s"' % cflags
+        #self.configure_options += ' -DCMAKE_CXX_FLAGS="%s"' % cxxflags
+        #self.configure_options += ' -DLIB_SUFFIX=%s ' % self.config.lib_suffix
+        cmake_cache = os.path.join(self.build_dir, 'CMakeCache.txt')
+        cmake_files = os.path.join(self.build_dir, 'CMakeFiles')
+        if os.path.exists(cmake_cache):
+            os.remove(cmake_cache)
+        if os.path.exists(cmake_files):
+            shutil.rmtree(cmake_files)
+        #MakefilesBase.configure(self)
+        if not os.path.exists(self.make_dir):
+            os.makedirs(self.make_dir)
+        if self.requires_non_src_build:
+            self.config_sh = '%s .. '%self.config_sh
+
+        shell.call(self.configure_tpl % {'config-sh': self.config_sh,
+            'prefix': to_unixpath(self.config.prefix),
+            'libdir': to_unixpath(self.config.libdir),
+            'host': self.config.host,
+            'target': self.config.target,
+            'build': self.config.build,
+            'options': self.configure_options},
+            self.make_dir)
+
+
+
+
 class BuildType (object):
 
     CUSTOM = CustomBuild
     MAKEFILE = MakefilesBase
     AUTOTOOLS = Autotools
     CMAKE = CMake
+    AUTOCMAKE = AutoCMake
