@@ -69,7 +69,6 @@ class Recipe(recipe.Recipe):
             assert len(content) > 100
             for name in ('libssl','libcrypto'):
                 content = content.replace( name + suffix ,name,-1 )
-                content = content.replace( name+'.lib', name[3:]+'.lib',-1 )
 
             f = open(os.path.join(self.make_dir,'makefile'),'w')
             f.write(content)
