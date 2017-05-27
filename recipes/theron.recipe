@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     name = 'theron'
     version = '6.00.02'
     stype = SourceType.TARBALL
-    #btype = BuildType.MAKEFILE
+    btype = BuildType.AUTOCMAKE
     url = 'http://www.ashtonmason.net/wp-content/uploads/2017/01/Theron-6.00.02.zip'
     licenses = [License.BSD_like]
     #add_host_build_target = False

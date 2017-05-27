@@ -6,7 +6,7 @@ class Recipe(recipe.Recipe):
     name = 'libevent'
     version = '2.1.8'
     stype = SourceType.TARBALL
-    #btype = BuildType.MAKEFILE
+    btype = BuildType.AUTOCMAKE
 	tarball_dirname = 'libevent-release-2.1.8-stable'
     url = 'https://github.com/libevent/libevent/archive/release-2.1.8-stable.tar.gz'
     licenses = [License.BSD_like]
@@ -20,9 +20,13 @@ class Recipe(recipe.Recipe):
     #files_devel = ['include/zlib.h', 'include/zconf.h', 'lib/pkgconfig/zlib.pc']
 
 
-    def prepare(self):
-        self.configure_options += " -DEVENT__BUILD_SHARED_LIBRARIES=OFF "
-	
+#    def prepare(self):
+#        pass
+#        return
+#        self.configure_options += " -DEVENT__BUILD_SHARED_LIBRARIES=OFF "
+#        self.configure_options += " -DOPENSSL_ROOT_DIR=%s "%self.config.prefix
+#        self.configure_options += " -DOPENSSL_LIBRARIES=%s/lib "%self.config.prefix
+#	
 #        if self.config.target_platform == Platform.WINDOWS:
 #            self.make = 'make -f win32/Makefile.gcc PREFIX=%s- ' % self.config.host
 #            self.make_install = 'make install -f win32/Makefile.gcc '\
