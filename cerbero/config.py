@@ -92,7 +92,7 @@ class Config (object):
                    'distro_packages_install', 'interactive',
                    'target_arch_flags', 'sysroot', 'isysroot',
                    'extra_lib_path', 'cached_sources', 'tools_prefix',
-                   'ios_min_version']
+                   'ios_min_version', 'build_type']
 
     def __init__(self):
         self._check_uninstalled()
@@ -339,6 +339,7 @@ class Config (object):
         self.set_property('extra_build_tools', {})
         self.set_property('distro_packages_install', True)
         self.set_property('interactive', True)
+        self.set_property('build_type','Release')
 
     def set_property(self, name, value, force=False):
         if name not in self._properties:

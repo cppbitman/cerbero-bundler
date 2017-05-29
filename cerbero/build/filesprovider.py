@@ -382,7 +382,7 @@ class FilesProvider(object):
                 pattern += 'lib/%(f)s.dll.a '
                 pattern += 'lib/%(f)s.def '
                 pattern += 'lib/%(fnolib)s.lib '
-                pattern += 'lib/%s.lib '
+                pattern += 'lib/%(f)s.lib '
             elif self.platform in [Platform.DARWIN, Platform.IOS]:
                 pattern += 'lib/%(f)s.dylib '
 

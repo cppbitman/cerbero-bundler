@@ -14,14 +14,17 @@ class Recipe(recipe.Recipe):
     #can_use_configure_cache = False
     #configure_tpl = "./configure --prefix %(prefix)s "\
     #                "--libdir %(libdir)s %(options)s"
-    patches = ['log4cplus/0001-AutoCMake-mode.patch']
+    patches = ['log4cplus/0001-AutoCMake-adaptation.patch']
     #
-    #files_libs = ['libz']
-    #files_devel = ['include/zlib.h', 'include/zconf.h', 'lib/pkgconfig/zlib.pc']
+    files_libs = ['liblog4cplus']
+    files_devel = ['include/log4cplus',  'lib/pkgconfig/log4cplus.pc']
 
 
-#    def prepare(self):
-#        self.configure_options += " -DEVENT__BUILD_SHARED_LIBRARIES=OFF "
+    def prepare(self):
+        self.configure_options += " -DEVENT__BUILD_SHARED_LIBRARIES=OFF "
+        self.configure_options += " -DLOG4CPLUS_ENABLE_DECORATED_LIBRARY_NAME=OFF "
+
+        
 #	
 #        if self.config.target_platform == Platform.WINDOWS:
 #            self.make = 'make -f win32/Makefile.gcc PREFIX=%s- ' % self.config.host

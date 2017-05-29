@@ -359,15 +359,16 @@ class AutoCMake (MakefilesBase):
 
     config_sh = 'cmake'
     configure_tpl = '%(config-sh)s -DCMAKE_INSTALL_PREFIX=%(prefix)s '\
-                    '-DCMAKE_LIBRARY_OUTPUT_PATH=%(libdir)s %(options)s '\
+                    '-DCMAKE_LIBRARY_OUTPUT_PATH=%(libdir)s '\
+                    '-DCMAKE_BUILD_TYPE=%(build_type)s '\
+                    '-DDCMAKE_CONFIGURATION_TYPES=%(build_type)s '\
                     '-DCMAKE_MODULE_PATH=D:/github.com/AutoCMake '\
-                    '-DCMAKE_FIND_ROOT_PATH=$CERBERO_PREFIX '
+                    '%(options)s '\
 
     make = 'msbuild.exe ALL_BUILD.vcxproj'
     make_install = 'msbuild.exe INSTALL.vcxproj'
     make_check = 'msbuild.exe RUN_TESTS.vcxproj'
     make_clean = 'msbuild.exe /t:clean ALL_BUILD.vcxproj'
-    requires_non_src_build = True
 
 
     @modify_environment
@@ -378,23 +379,13 @@ class AutoCMake (MakefilesBase):
             cxx = cxx.replace('ccache', '').strip()
 
         if self.config.target_platform == Platform.WINDOWS:
-            self.configure_options += ' -DCMAKE_SYSTEM_NAME=Windows '
+            if self.config.target_arch == Architecture.X86:
+                self.configure_options += ' -G\\"Visual Studio 14\\" '
+            elif self.config.target_arch == Architecture.X86_64:
+                self.configure_options += ' -G\\"Visual Studio 14 2015 Win64\\" '
+
         elif self.config.target_platform == Platform.ANDROID:
             self.configure_options += ' -DCMAKE_SYSTEM_NAME=Linux '
-
-        print self.config.target_arch,"<-------"
-
-        if self.config.target_arch == Architecture.X86:
-            self.configure_options += ' -G\\"Visual Studio 14\\" '
-        elif self.config.target_arch == Architecture.X86_64:
-            self.configure_options += ' -G\\"Visual Studio 14 2015 Win64\\" '
-        
-        if self.config.variants.debug:
-            self.configure_options += '-DCMAKE_BUILD_TYPE=Debug '
-        else:
-            self.configure_options += '-DCMAKE_BUILD_TYPE=Release '
-
-        print '%s | %s'%(self.config_src_dir,self.make_dir)
 
         if self.config_src_dir != self.make_dir:
             self.configure_options += ' %s '%self.config_src_dir
@@ -408,11 +399,13 @@ class AutoCMake (MakefilesBase):
             sysroot = r.match(cflags).group(1)
             self.configure_options += ' -DCMAKE_OSX_SYSROOT=%s' % sysroot
 
-        #self.configure_options += ' -DCMAKE_C_COMPILER=%s ' % cc
-        #self.configure_options += ' -DCMAKE_CXX_COMPILER=%s ' % cxx
-        #self.configure_options += ' -DCMAKE_C_FLAGS="%s"' % cflags
-        #self.configure_options += ' -DCMAKE_CXX_FLAGS="%s"' % cxxflags
-        #self.configure_options += ' -DLIB_SUFFIX=%s ' % self.config.lib_suffix
+        if self.config.target_platform != Platform.WINDOWS:
+            self.configure_options += ' -DCMAKE_C_COMPILER=%s ' % cc
+            self.configure_options += ' -DCMAKE_CXX_COMPILER=%s ' % cxx
+            self.configure_options += ' -DCMAKE_C_FLAGS="%s"' % cflags
+            self.configure_options += ' -DCMAKE_CXX_FLAGS="%s"' % cxxflags
+        self.configure_options += ' -DLIB_SUFFIX=%s ' % self.config.lib_suffix
+        
         cmake_cache = os.path.join(self.build_dir, 'CMakeCache.txt')
         cmake_files = os.path.join(self.build_dir, 'CMakeFiles')
         if os.path.exists(cmake_cache):
@@ -431,6 +424,7 @@ class AutoCMake (MakefilesBase):
             'host': self.config.host,
             'target': self.config.target,
             'build': self.config.build,
+            'build_type': self.config.build_type,
             'options': self.configure_options},
             self.make_dir)
 
