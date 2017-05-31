@@ -56,7 +56,7 @@ class Recipe(recipe.Recipe):
     config_sh = 'Configure'
     configure_tpl ='perl %(config-sh)s %(options)s --prefix=%(prefix)s'
     files_bins =['openssl']
-    files_libs = ['libssl','libcrypto','libcapi','libpadlock']
+    files_libs = ['libssl','libcrypto']#,'libcapi','libpadlock']
     files_devel = ['include/openssl', 'lib/pkgconfig/openssl.pc']
     
 
