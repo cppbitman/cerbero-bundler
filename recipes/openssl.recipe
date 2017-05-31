@@ -5,17 +5,46 @@ from cerbero.errors import CerberoException
 
 import shutil
 
-PC_TMPL='''
+PC_OPENSSL_TMPL='''
 prefix=%(prefix)s
 exec_prefix=${prefix}
-libdir=${prefix}/lib
+libdir=${exec_prefix}/lib
 includedir=${prefix}/include
 
-Name: openssl
-Description: toolkit for the Transport Layer Security (TLS) and Secure Sockets Layer (SSL) protocols
+Name: OpenSSL
+Description: Secure Sockets Layer and cryptography libraries and tools
 Version: %(version)s
 Libs: -L${libdir} -lcrypto -lssl
 Cflags: -I${includedir}
+'''
+
+PC_LIBSSL_TMPL='''
+prefix=%(prefix)s
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: OpenSSL-libssl
+Description: Secure Sockets Layer and cryptography libraries
+Version: %(version)s
+Requires.private: libcrypto
+Libs: -L${libdir} -lssl
+Cflags: -I${includedir} 
+'''
+
+PC_LIBCRYPTO_TMPL='''
+prefix=%(prefix)s
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+enginesdir=${libdir}/engines
+
+Name: OpenSSL-libcrypto
+Description: OpenSSL cryptography library
+Version: %(version)s
+Requires: 
+Libs: -L${libdir} -lcrypto
+Cflags: -I${includedir} 
 '''
 
 class Recipe(recipe.Recipe):
@@ -27,7 +56,7 @@ class Recipe(recipe.Recipe):
     config_sh = 'Configure'
     configure_tpl ='perl %(config-sh)s %(options)s --prefix=%(prefix)s'
     files_bins =['openssl']
-    files_libs = ['libssl','libcrypto']
+    files_libs = ['libssl','libcrypto','libcapi','libpadlock']
     files_devel = ['include/openssl', 'lib/pkgconfig/openssl.pc']
     
 
@@ -61,14 +90,13 @@ class Recipe(recipe.Recipe):
         if self.config.target_platform == Platform.WINDOWS:
             suffix={Architecture.X86:'-1_1',Architecture.X86_64:'-1_1-x64'}[self.config.target_arch]
             #modify makfile lib related name to fit cerber rules
-            print os.getcwd(),'************'
-            print os.path.join(self.make_dir,'makefile')
             f = open(os.path.join(self.make_dir,'makefile'),'r')
             content = f.read()
             f.close()
             assert len(content) > 100
             for name in ('libssl','libcrypto'):
                 content = content.replace( name + suffix ,name,-1 )
+                content = content.replace( name + '.lib', name[3:]+'.lib',-1 )
 
             f = open(os.path.join(self.make_dir,'makefile'),'w')
             f.write(content)
@@ -138,10 +166,16 @@ class Recipe(recipe.Recipe):
 
 
         f =open( os.path.join(pkgconfigd,'openssl.pc'),'w')
-        f.write( PC_TMPL%{ 'prefix':self.config.prefix,'version':self.version})
+        f.write( PC_OPENSSL_TMPL%{ 'prefix':self.config.prefix,'version':self.version})
         f.close()
 
+        f =open( os.path.join(pkgconfigd,'libssl.pc'),'w')
+        f.write( PC_LIBSSL_TMPL%{ 'prefix':self.config.prefix,'version':self.version})
+        f.close()
 
+        f =open( os.path.join(pkgconfigd,'libcrypto.pc'),'w')
+        f.write( PC_LIBCRYPTO_TMPL%{ 'prefix':self.config.prefix,'version':self.version})
+        f.close()
 
 
 
