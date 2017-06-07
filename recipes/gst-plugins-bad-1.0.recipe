@@ -23,7 +23,7 @@ class Recipe(custom.GStreamer):
         --enable-faad --enable-kate --enable-openh264 --enable-opus \
         --enable-hls --enable-rtmp --enable-srtp --enable-dts \
         --enable-libmms --enable-resindvd --enable-soundtouch \
-        --enable-dtls \		
+        --enable-dtls \
         --enable-voaacenc --enable-rsvg --enable-openjpeg --enable-spandsp'
     remotes = {'origin': 'git://anongit.freedesktop.org/gstreamer/gst-plugins-bad'}
     deps = ['gstreamer-1.0', 'gst-plugins-base-1.0', 'bzip2', 'libass',

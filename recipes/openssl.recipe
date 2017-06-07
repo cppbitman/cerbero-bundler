@@ -1,6 +1,8 @@
 # -*- Mode: Python -*- vi:si:et:sw=4:sts=4:ts=4:syntax=python
 from cerbero.tools.libtool import LibtoolLibrary
-from cerbero.tools import software
+import platform
+if platform.system() == 'Windows':
+    from cerbero.tools import software
 from cerbero.errors import CerberoException
 
 import shutil
@@ -53,8 +55,12 @@ class Recipe(recipe.Recipe):
     stype = SourceType.TARBALL
     btype = BuildType.MAKEFILE
     url = 'https://www.openssl.org/source/openssl-1.1.0e.tar.gz'
-    config_sh = 'Configure'
-    configure_tpl ='perl %(config-sh)s %(options)s --prefix=%(prefix)s'
+    if platform.system() == 'Windows':
+        config_sh = 'Configure'
+        configure_tpl ='perl %(config-sh)s %(options)s --prefix=%(prefix)s'
+    elif platform.system() == 'Linux':
+        config_sh = './config'
+        configure_tpl = "%(config-sh)s no-asm shared --prefix=%(prefix)s"
     files_bins =['openssl']
     files_libs = ['libssl','libcrypto']#,'libcapi','libpadlock']
     files_devel = ['include/openssl', 'lib/pkgconfig/openssl.pc']
