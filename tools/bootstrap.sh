@@ -115,6 +115,7 @@ function _prepare(){
 }
 
 function _windows(){
+      echo "start bootstraping for windows..."
 
    	_fetch $(eval map 'cerbero-${VERSION}-build_tools-windows')
 	
@@ -126,7 +127,15 @@ function _windows(){
 	./cerbero-uninstalled -c config/win32.cbc bootstrap
 
 }
+#-------------------------------------------------------------------------------------------------------------------------------------
+function _gnu_linux(){
+      echo "start bootstraping for GNU/Linux..."
+
+      [ $(uname -m) = "x86_64" ] && ./cerbero-uninstalled -c config/lin-x86-64.cbc bootstrap
+}
+#-------------------------------------------------------------------------------------------------------------------------------------
 #_prepare
 
-[ -n $MSYSTEM ] && _windows
+[ -n "$MSYSTEM" ] && _windows
+[ $(uname -o) = "GNU/Linux" ] && _gnu_linux
 
