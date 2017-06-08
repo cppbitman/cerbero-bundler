@@ -103,7 +103,7 @@ class DebianBootstrapper (UnixBootstrapper):
 class RedHatBootstrapper (UnixBootstrapper):
 
     packages = ['gcc', 'gcc-c++', 'automake', 'autoconf', 'libtool',
-                'gettext-devel', 'make', 'cmake', 'bison', 'flex', 'yasm',
+                'gettext-devel', 'make', 'cmake', 'bison', 'flex', 'yasm', 'nasm',
                 'pkgconfig', 'gtk-doc', 'curl', 'doxygen', 'texinfo',
                 'texinfo-tex', 'texlive-dvips', 'docbook-style-xsl',
                 'transfig', 'intltool', 'rpm-build', 'redhat-rpm-config',
