@@ -42,6 +42,12 @@ function _windows(){
 function _gnu_linux(){
     echo "start bundle for GNU/Linux..."
 
+    #for libffi build
+    [ $(awk '{match($0,/^ID=(.*)/,a);NF;print a[1]}' /etc/os-release|awk NF) = "ubuntu" ] && 
+      git config --global user.email "daihongjun@kedacom.com" &&
+      git config --global user.name "daihongjun"
+
+
     if [ $(uname -m) = "x86_64" ]; then
         for pkg in ${PKGS[*]}
         do
