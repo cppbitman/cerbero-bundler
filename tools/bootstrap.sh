@@ -8,7 +8,7 @@ __cerberod__=$(cd ${__dir__}/.. && pwd)
 VERSION=1.12.0
 PATCHNO=1
 
-CERBERO_REPO='http://127.0.0.1/'
+CERBERO_REPO='http://172.16.66.94'
 #HTTP_MIRROR='http://127.0.0.1:6786/mms/repo/mirror'
 
 _MAP=(
@@ -16,7 +16,8 @@ _MAP=(
    "cerbero-tarball@${CERBERO_REPO}/${VERSION}/cerbero-${VERSION}.tar.xz"
    "cerbero-tarball-sources-1@${CERBERO_REPO}/${VERSION}/cerbero-${VERSION}-sources-1.tar.xz"
      "cerbero-${VERSION}-build_tools-windows@${CERBERO_REPO}/${VERSION}/cerbero-${VERSION}-build_tools-windows.tar.xz"
-   "cerbero-${VERSION}-build_tools-linux@${CERBERO_REPO}/sources/build-tool-lin-x86_64-1.12.0.tar.bz2"	
+   "cerbero-${VERSION}-build_tools-linux@${CERBERO_REPO}/sources/cerbero-${VERSION}-build_tools-linux.tar.xz"
+   "cerbero-tarball-sources-2@${CERBERO_REPO}/sources/cerbero-${VERSION}-sources-2.tar.xz"	
 )
 
 _GITIGNORE='*pyc
@@ -132,11 +133,15 @@ function _windows(){
 function _gnu_linux(){
       echo "start bootstraping for GNU/Linux..."
 
+      [ ! -d ./sources ] && mkdir ./sources
+
       _fetch $(eval map 'cerbero-${VERSION}-build_tools-linux')
-      [! -d ./sources ] && mkdir ./sources
-      _tar -xJf cerbero-${VERSION}-build_tools-linux.tar.bz2 -C ./sources/. --checkpoint=100
+      _tar -xJf cerbero-${VERSION}-build_tools-linux.tar.xz -C ./sources/. --checkpoint=100
 
       [ $(uname -m) = "x86_64" ] && ./cerbero-uninstalled -c config/lin-x86-64.cbc bootstrap
+
+      _fetch $(eval map 'cerbero-tarball-sources-2')
+      _tar -xJf cerbero-${VERSION}-sources-2.tar.xz -C ./sources/. --checkpoint=100
 }
 #-------------------------------------------------------------------------------------------------------------------------------------
 #_prepare
